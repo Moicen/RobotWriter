@@ -73,6 +73,11 @@ target/
 # pyenv
 .python-version
 
+
+# project
+checkpoints/
+output/
+
 # celery beat schedule file
 celerybeat-schedule
 
