@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+# file: song_lyrics.py
+# author: JinTian
+# time: 08/03/2017 10:22 PM
+# Copyright 2017 JinTian. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------
 
 import collections
 import os
@@ -8,7 +26,7 @@ from utils.model import rnn_model
 from utils.process import process, generate_batch
 import time
 
-tf.app.flags.DEFINE_integer('batch_size', 12, 'batch size.')
+tf.app.flags.DEFINE_integer('batch_size', 1, 'batch size.')
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning rate.')
 
 tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/story.txt'), 'file path of story.')
@@ -16,7 +34,7 @@ tf.app.flags.DEFINE_string('checkpoints_dir', os.path.abspath('./checkpoints'), 
 tf.app.flags.DEFINE_string('model_prefix', 'story', 'model save prefix.')
 tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'), 'file path of output.')
 
-tf.app.flags.DEFINE_integer('epochs', 200, 'train how many epochs.')
+tf.app.flags.DEFINE_integer('epochs', 1000, 'train how many epochs.')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -56,6 +74,7 @@ def train():
         print('[INFO] start training...')
         try:
             for epoch in range(start_epoch, FLAGS.epochs):
+                print("[INFO]--------- Epoch: %d --------" % (epoch))
                 n = 0
                 n_chunk = len(story_vector) // FLAGS.batch_size
                 for batch in range(n_chunk):
@@ -67,7 +86,7 @@ def train():
                     ], feed_dict={input_data: batches_inputs[n], output_targets: batches_outputs[n]})
                     n += 1
                     end_at = time.time()
-                    print('[INFO] Epoch: %d , batch: %d , time: %fs, training loss: %.6f' % (epoch, batch, end_at - start_at, loss))
+                    print('[INFO] batch: %d , time: %fs, training loss: %.6f' % (batch, end_at - start_at, loss))
                 if epoch % 20 == 0:
                     saver.save(sess, os.path.join(FLAGS.checkpoints_dir, FLAGS.model_prefix), global_step=epoch)
         except KeyboardInterrupt:
