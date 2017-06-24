@@ -26,7 +26,7 @@ from utils.model import rnn_model
 from utils.process import process, generate_batch
 import time
 
-tf.app.flags.DEFINE_integer('batch_size', 6, 'batch size.')
+tf.app.flags.DEFINE_integer('batch_size', 10, 'batch size.')
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning rate.')
 
 tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/story.txt'), 'file path of story.')
@@ -34,7 +34,7 @@ tf.app.flags.DEFINE_string('checkpoints_dir', os.path.abspath('./checkpoints'), 
 tf.app.flags.DEFINE_string('model_prefix', 'story', 'model save prefix.')
 tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'), 'file path of output.')
 
-tf.app.flags.DEFINE_integer('epochs', 1000, 'train how many epochs.')
+tf.app.flags.DEFINE_integer('epochs', 300, 'train how many epochs.')
 
 FLAGS = tf.app.flags.FLAGS
 
