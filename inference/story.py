@@ -26,7 +26,7 @@ from utils.model import rnn_model
 from utils.process import process, generate_batch
 import time
 
-tf.app.flags.DEFINE_integer('batch_size', 1, 'batch size.')
+tf.app.flags.DEFINE_integer('batch_size', 6, 'batch size.')
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning rate.')
 
 tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/story.txt'), 'file path of story.')
