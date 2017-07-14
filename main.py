@@ -24,9 +24,12 @@ def parse_args():
     # help_ = 'you can set this value in terminal --write value can be story, novel.'
     # parser.add_argument('-w', '--write', default='story', choices=['story', 'novel'], help=help_)
 
-    help_ = 'choose to train or generate.'
+    help_ = 'choose to train or generate. [batch] set batch size, [epoch] set repeat times'
     parser.add_argument('--train', dest='train', action='store_true', help=help_)
     parser.add_argument('--no-train', dest='train', action='store_false', help=help_)
+
+    parser.add_argument('--batch', dest='batch', type=int, help=help_)
+    parser.add_argument('--epochs', dest='epochs', type=int, help=help_)
     parser.set_defaults(train=True)
 
     args_ = parser.parse_args()
@@ -37,7 +40,7 @@ if __name__ == '__main__':
     args = parse_args()
     from inference import story
     if args.train:
-        story.main(True)
+        story.main(True, args.batch, args.epochs)
     else:
         story.main(False)
     # if args.write == 'story':

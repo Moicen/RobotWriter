@@ -26,7 +26,6 @@ from utils.model import rnn_model
 from utils.process import process, generate_batch
 import time
 
-tf.app.flags.DEFINE_integer('batch_size', 10, 'batch size.')
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning rate.')
 
 tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/story.txt'), 'file path of story.')
@@ -34,7 +33,6 @@ tf.app.flags.DEFINE_string('checkpoints_dir', os.path.abspath('./checkpoints'), 
 tf.app.flags.DEFINE_string('model_prefix', 'story', 'model save prefix.')
 tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'), 'file path of output.')
 
-tf.app.flags.DEFINE_integer('epochs', 300, 'train how many epochs.')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -42,21 +40,26 @@ start_token = 'S'
 end_token = 'E'
 
 
-def train():
+def train(batch_size, epochs):
     if not os.path.exists(os.path.dirname(FLAGS.checkpoints_dir)):
         os.mkdir(os.path.dirname(FLAGS.checkpoints_dir))
     if not os.path.exists(FLAGS.checkpoints_dir):
         os.mkdir(FLAGS.checkpoints_dir)
 
+    if not batch_size:
+        batch_size = 10
+    if not epochs:
+        epochs = 300 
+
     story_vector, word_to_int, vocabularies = process(FLAGS.file_path)
 
-    batches_inputs, batches_outputs = generate_batch(FLAGS.batch_size, story_vector, word_to_int)
+    batches_inputs, batches_outputs = generate_batch(batch_size, story_vector, word_to_int)
 
-    input_data = tf.placeholder(tf.int32, [FLAGS.batch_size, None])
-    output_targets = tf.placeholder(tf.int32, [FLAGS.batch_size, None])
+    input_data = tf.placeholder(tf.int32, [batch_size, None])
+    output_targets = tf.placeholder(tf.int32, [batch_size, None])
 
     end_points = rnn_model(model='lstm', input_data=input_data, output_data=output_targets, vocab_size=len(
-        vocabularies), rnn_size=128, num_layers=2, batch_size=FLAGS.batch_size, learning_rate=FLAGS.learning_rate)
+        vocabularies), rnn_size=128, num_layers=2, batch_size=batch_size, learning_rate=FLAGS.learning_rate)
 
     saver = tf.train.Saver(tf.global_variables())
     init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -73,10 +76,10 @@ def train():
             start_epoch += int(checkpoint.split('-')[-1])
         print('[INFO] start training...')
         try:
-            for epoch in range(start_epoch, FLAGS.epochs):
+            for epoch in range(start_epoch, epochs):
                 print("[INFO]--------- Epoch: %d --------" % (epoch))
                 n = 0
-                n_chunk = len(story_vector) // FLAGS.batch_size
+                n_chunk = len(story_vector) // batch_size
                 for batch in range(n_chunk):
                     start_at = time.time()
                     loss, _, _ = sess.run([
@@ -140,10 +143,10 @@ def write():
         return story
 
 
-def main(is_train):
+def main(is_train, batch_size, epochs):
     if is_train:
         print('[INFO] train story...')
-        train()
+        train(batch_size, epochs)
     else:
         print('[INFO] compose story...')
         story = write()
