@@ -40,16 +40,11 @@ start_token = 'S'
 end_token = 'E'
 
 
-def train(batch_size, epochs):
+def train(batch_size = 10, epochs = 200):
     if not os.path.exists(os.path.dirname(FLAGS.checkpoints_dir)):
         os.mkdir(os.path.dirname(FLAGS.checkpoints_dir))
     if not os.path.exists(FLAGS.checkpoints_dir):
         os.mkdir(FLAGS.checkpoints_dir)
-
-    if not batch_size:
-        batch_size = 10
-    if not epochs:
-        epochs = 200 
 
     story_vector, word_to_int, vocabularies = process(FLAGS.file_path)
 
