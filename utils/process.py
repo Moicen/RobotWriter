@@ -58,7 +58,6 @@ def process(file_name):
     articles = read(file_name)
     articles = sorted(articles, key=lambda article: len(article))
     print('total %d stories...' % len(articles))
-
     
     all_words = []
     for article in articles:

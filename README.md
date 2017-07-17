@@ -7,7 +7,7 @@ requiest: `tensorflow`, `python3`
 usage: 
 
 	# train
-	python3 main.py --train
+	python3 main.py --train [--batch=] [--epochs=]
 	#generate
 	python3 main.py --no-train
 

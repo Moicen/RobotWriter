@@ -49,9 +49,10 @@ def train(batch_size, epochs):
     if not batch_size:
         batch_size = 10
     if not epochs:
-        epochs = 300 
+        epochs = 200 
 
     story_vector, word_to_int, vocabularies = process(FLAGS.file_path)
+
 
     batches_inputs, batches_outputs = generate_batch(batch_size, story_vector, word_to_int)
 
