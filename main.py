@@ -42,7 +42,7 @@ if __name__ == '__main__':
     if args.train:
         story.main(True, args.batch, args.epochs)
     else:
-        story.main(False)
+        story.main(False, None, None)
     # if args.write == 'story':
     #     from inference import story
     #     if args.train:
