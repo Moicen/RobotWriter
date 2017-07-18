@@ -105,7 +105,7 @@ def to_word(predictions, vocabularies):
             print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
             print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
             word = vocabularies[idx]
-            if(word != ''):
+            if(word != ' '):
                 return vocabularies[idx]
         cnt += 1
 
