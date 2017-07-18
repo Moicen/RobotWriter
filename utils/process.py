@@ -68,8 +68,13 @@ def process(file_name):
     # sorted depends on frequent
     counter_pairs = sorted(counter.items(), key=lambda x: -x[1])
     words, _ = zip(*counter_pairs)
+    
     words = words[:len(words)] + (' ',)
+
     word_int_map = dict(zip(words, range(len(words))))
+
+    # print(word_int_map)
+
     # translate all articles into int vector
     vector = [list(map(lambda word: word_int_map.get(word, len(words)), article)) for article in articles]
     return vector, word_int_map, words

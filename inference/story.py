@@ -93,32 +93,21 @@ def train(batch_size = 10, epochs = 200):
             print('[INFO] Last epoch were saved, next time will start from epoch {}.'.format(epoch))
 
 def to_word(predictions, vocabularies):
-    t = np.cumsum(predictions)
-    s = np.sum(predictions)
-    sample = int(np.searchsorted(t, np.random.rand(1) * s))
-    if sample > len(vocabularies):
-        sample = len(vocabularies) - 1
-    return vocabularies[sample]
+    predictions = predictions[0]
+    idx = np.argmax(predictions)
+    
+    if(idx >= len(vocabularies)):
+        idx = len(vocabularies) - 1
 
-    # predictions = predictions[0]
-    # max_prob = max(predictions)
-    # #threshold = (1-max_prob)*max_prob#Generate random probility threshole
-    # threshold = np.random.uniform(0.4,0.7)*max_prob
-    # true_idx = np.argmax(predictions)
-    # cnt = 0
-    # while(True):
-    #     idx = np.random.randint(0,len(predictions)-1)
-    #     if(predictions[idx]>=threshold):
-    #         print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
-    #         print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
-    #         word = vocabularies[idx]
-    #         if(word != ' '):
-    #             return vocabularies[idx]
-    #     cnt += 1
+    word = vocabularies[idx]
+    print("index: %d, word: %s" % (idx, word))
+    return word
+
 
 def write():
     batch_size = 1
     story_vector, word_int_map, vocabularies = process(FLAGS.file_path)
+
 
     input_data = tf.placeholder(tf.int32, [batch_size, None])
 
@@ -137,9 +126,9 @@ def write():
 
         [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                          feed_dict={input_data: x})
-
-        word = to_word(predict, vocabularies)
         
+        word = to_word(predict, vocabularies)
+
         story = ''
         while word != end_token:
             story += word
@@ -147,11 +136,8 @@ def write():
             x[0, 0] = word_int_map[word]
             [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                              feed_dict={input_data: x, end_points['initial_state']: last_state})
-            # word = to_word(predict, vocabularies)
-            idx = np.argmax(predict)
-            if(idx > len(vocabularies) - 1):
-                idx = len(vocabularies) - 1
-            word = vocabularies[idx]
+
+            word = to_word(predict, vocabularies)
         return story
 
 
