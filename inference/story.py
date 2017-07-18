@@ -48,7 +48,6 @@ def train(batch_size = 10, epochs = 200):
 
     story_vector, word_to_int, vocabularies = process(FLAGS.file_path)
 
-
     batches_inputs, batches_outputs = generate_batch(batch_size, story_vector, word_to_int)
 
     input_data = tf.placeholder(tf.int32, [batch_size, None])
