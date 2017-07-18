@@ -93,21 +93,28 @@ def train(batch_size = 10, epochs = 200):
             print('[INFO] Last epoch were saved, next time will start from epoch {}.'.format(epoch))
 
 def to_word(predictions, vocabularies):
-    predictions = predictions[0]
-    max_prob = max(predictions)
-    #threshold = (1-max_prob)*max_prob#Generate random probility threshole
-    threshold = np.random.uniform(0.4,0.7)*max_prob
-    true_idx = np.argmax(predictions)
-    cnt = 0
-    while(True):
-        idx = np.random.randint(0,len(predictions)-1)
-        if(predictions[idx]>=threshold):
-            print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
-            print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
-            word = vocabularies[idx]
-            if(word != ' '):
-                return vocabularies[idx]
-        cnt += 1
+    t = np.cumsum(predictions)
+    s = np.sum(predictions)
+    sample = int(np.searchsorted(t, np.random.rand(1) * s))
+    if sample > len(vocabularies):
+        sample = len(vocabularies) - 1
+    return vocabularies[sample]
+
+    # predictions = predictions[0]
+    # max_prob = max(predictions)
+    # #threshold = (1-max_prob)*max_prob#Generate random probility threshole
+    # threshold = np.random.uniform(0.4,0.7)*max_prob
+    # true_idx = np.argmax(predictions)
+    # cnt = 0
+    # while(True):
+    #     idx = np.random.randint(0,len(predictions)-1)
+    #     if(predictions[idx]>=threshold):
+    #         print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
+    #         print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
+    #         word = vocabularies[idx]
+    #         if(word != ' '):
+    #             return vocabularies[idx]
+    #     cnt += 1
 
 def write():
     batch_size = 1
