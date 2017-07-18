@@ -94,19 +94,18 @@ def train(batch_size = 10, epochs = 200):
 
 def to_word(predictions, vocabularies):
     predictions = predictions[0]
-    # max_prob = max(predictions)
+    max_prob = max(predictions)
     #threshold = (1-max_prob)*max_prob#Generate random probility threshole
-    # threshold = np.random.uniform(0.4,0.7)*max_prob
+    threshold = np.random.uniform(0.4,0.7)*max_prob
     true_idx = np.argmax(predictions)
-    return vocabularies[true_idx]
-    # cnt = 0
-    # while(True):
-    #     idx = np.random.randint(0,len(predictions)-1)
-    #     if(predictions[idx]>=threshold):
-    #         print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
-    #         print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
-    #         return vocabularies[idx]
-    #     cnt += 1
+    cnt = 0
+    while(True):
+        idx = np.random.randint(0,len(predictions)-1)
+        if(predictions[idx]>=threshold):
+            print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
+            print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
+            return vocabularies[idx]
+        cnt += 1
 
 def write():
     batch_size = 1
@@ -139,8 +138,8 @@ def write():
             x[0, 0] = word_int_map[word]
             [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                              feed_dict={input_data: x, end_points['initial_state']: last_state})
-            word = to_word(predict, vocabularies)
-        # word = words[np.argmax(probs_)]
+            # word = to_word(predict, vocabularies)
+            word = vocabularies[np.argmax(predict)]
         return story
 
 
