@@ -139,7 +139,10 @@ def write():
             [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                              feed_dict={input_data: x, end_points['initial_state']: last_state})
             # word = to_word(predict, vocabularies)
-            word = vocabularies[np.argmax(predict)]
+            idx = np.argmax(predict)
+            if(idx > len(vocabularies) - 1):
+                idx = len(vocabularies) - 1
+            word = vocabularies[idx]
         return story
 
 
