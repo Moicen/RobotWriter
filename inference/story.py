@@ -85,22 +85,27 @@ def train(batch_size = 10, epochs = 200):
                     n += 1
                     end_at = time.time()
                     print('[INFO] batch: %d , time: %fs, training loss: %.6f' % (batch, end_at - start_at, loss))
-                if epoch % 20 == 0:
+                if (epoch + 1) % 20 == 0:
                     saver.save(sess, os.path.join(FLAGS.checkpoints_dir, FLAGS.model_prefix), global_step=epoch)
         except KeyboardInterrupt:
             print('[INFO] Interrupt manually, try saving checkpoint for now...')
             saver.save(sess, os.path.join(FLAGS.checkpoints_dir, FLAGS.model_prefix), global_step=epoch)
             print('[INFO] Last epoch were saved, next time will start from epoch {}.'.format(epoch))
 
-
-def to_word(predict, vocabs):
-    t = np.cumsum(predict)
-    s = np.sum(predict)
-    sample = int(np.searchsorted(t, np.random.rand(1) * s))
-    if sample > len(vocabs)-1:
-        sample = len(vocabs) - 100
-    return vocabs[sample]
-
+def to_word(predictions):
+    predictions = predictions[0]
+    max_prob = max(predictions)
+    #threshold = (1-max_prob)*max_prob#Generate random probility threshole
+    threshold = np.random.uniform(0.4,0.7)*max_prob
+    true_idx = np.argmax(predictions)
+    cnt = 0
+    while(True):
+        idx = random.randint(0,len(predictions)-1)
+        if(predictions[idx]>=threshold):
+            print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',words[true_idx])
+            print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',words[idx])
+            return words[idx]
+        cnt += 1
 
 def write():
     batch_size = 1
@@ -124,7 +129,7 @@ def write():
         [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                          feed_dict={input_data: x})
 
-        word = to_word(predict, vocabularies)
+        word = to_word(predict)
         print(word)
         story = ''
         while word != end_token:
@@ -133,7 +138,7 @@ def write():
             x[0, 0] = word_int_map[word]
             [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                              feed_dict={input_data: x, end_points['initial_state']: last_state})
-            word = to_word(predict, vocabularies)
+            word = to_word(predict)
         # word = words[np.argmax(probs_)]
         return story
 
