@@ -94,18 +94,19 @@ def train(batch_size = 10, epochs = 200):
 
 def to_word(predictions, vocabularies):
     predictions = predictions[0]
-    max_prob = max(predictions)
+    # max_prob = max(predictions)
     #threshold = (1-max_prob)*max_prob#Generate random probility threshole
-    threshold = np.random.uniform(0.4,0.7)*max_prob
+    # threshold = np.random.uniform(0.4,0.7)*max_prob
     true_idx = np.argmax(predictions)
-    cnt = 0
-    while(True):
-        idx = np.random.randint(0,len(predictions)-1)
-        if(predictions[idx]>=threshold):
-            print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
-            print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
-            return vocabularies[idx]
-        cnt += 1
+    return vocabularies[true_idx]
+    # cnt = 0
+    # while(True):
+    #     idx = np.random.randint(0,len(predictions)-1)
+    #     if(predictions[idx]>=threshold):
+    #         print('cnt:',cnt,' probi:',predictions[true_idx],' true_idx:',true_idx,' w:',vocabularies[true_idx])
+    #         print('threshold:',threshold,' pred_idx:',idx,' prob:',predictions[idx],' w:',vocabularies[idx])
+    #         return vocabularies[idx]
+    #     cnt += 1
 
 def write():
     batch_size = 1
