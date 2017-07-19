@@ -118,24 +118,39 @@ def write():
         checkpoint = tf.train.latest_checkpoint(FLAGS.checkpoints_dir)
         saver.restore(sess, checkpoint)
 
-        x = np.array([list(map(word_int_map.get, start_token))])
+        stories = ""
+        i = 0
+        while i < 10:
+            stories += article(sess, end_points, vocabularies, word_int_map, input_data)
+            stories += "\n\n\n\n"
+            i += 1
+            print("story %d complete" % (i))
+        return stories
+        
 
-        [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
+def article(sess, end_points, vocabularies, word_int_map, input_data):
+    
+    x = np.array([list(map(word_int_map.get, start_token))])
+    [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                          feed_dict={input_data: x})
-        # 第一个词，随机一个索引
-        word = to_word(predict, vocabularies, np.random.random_integers(7, 5111))
+     # 第一个词，随机一个索引
+    word = to_word(predict, vocabularies, np.random.random_integers(7, 5111))
 
-        story = ''
-        while word != end_token:
-            story += word
-            x = np.zeros((1, 1))
-            x[0, 0] = word_int_map[word]
-            [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
-                                             feed_dict={input_data: x, end_points['initial_state']: last_state})
+    story = ''
+    prev = ''
+    while word != end_token:
+        if prev == '\n':
+            # 正文每行缩进
+            story += '    '
+        story += word
+        prev = word
+        x = np.zeros((1, 1))
+        x[0, 0] = word_int_map[word]
+        [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
+                                         feed_dict={input_data: x, end_points['initial_state']: last_state})
 
-            word = to_word(predict, vocabularies)
-        return story
-
+        word = to_word(predict, vocabularies)
+    return story
 
 def main(is_train, batch_size, epochs):
     if is_train:
