@@ -109,6 +109,7 @@ def article(sess, end_points, vocabularies, word_int_map, input_data):
 
     story = ''
     prev = ''
+    count = 0
     while word != end_token:
         if prev == '\n':
             # 正文每行缩进
@@ -117,10 +118,13 @@ def article(sess, end_points, vocabularies, word_int_map, input_data):
         prev = word
         x = np.zeros((1, 1))
         x[0, 0] = word_int_map[word]
-        [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
-                                         feed_dict={input_data: x, end_points['initial_state']: last_state})
+        [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']], 
+            feed_dict={input_data: x, end_points['initial_state']: last_state})
 
         word = to_word(predict, vocabularies)
+        count = count + 1
+        print("word %d" % (count))
+    print("Total %d words" % (count))
     return story
 
 def write():
