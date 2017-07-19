@@ -52,8 +52,7 @@ def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_laye
         initial_state = cell.zero_state(1, tf.float32)
 
     # with tf.device("/gpu:0"):
-    embedding = tf.get_variable('embedding', initializer=tf.random_uniform(
-        [vocab_size + 1, rnn_size], -1.0, 1.0))
+    embedding = tf.get_variable('embedding', initializer=tf.random_uniform([vocab_size + 1, rnn_size], -1.0, 1.0))
     inputs = tf.nn.embedding_lookup(embedding, input_data)
 
     # [batch_size, ?, rnn_size] = [64, ?, 128]
