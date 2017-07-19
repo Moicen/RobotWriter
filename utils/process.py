@@ -73,8 +73,6 @@ def process(file_name):
 
     word_int_map = dict(zip(words, range(len(words))))
 
-    # print(word_int_map)
-
     # translate all articles into int vector
     vector = [list(map(lambda word: word_int_map.get(word, len(words)), jieba.lcut(article, cut_all=False))) for article in articles]
 

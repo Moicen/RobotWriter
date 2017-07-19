@@ -105,7 +105,7 @@ def write():
     story_vector, word_int_map, vocabularies = process(FLAGS.file_path)
 
 
-    input_data = tf.placeholder(tf.int32, [batch_size])
+    input_data = tf.placeholder(tf.int32, [batch_size, None])
 
     end_points = rnn_model(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
         vocabularies), rnn_size=128, num_layers=2, batch_size=64, learning_rate=FLAGS.learning_rate)
