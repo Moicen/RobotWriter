@@ -144,6 +144,7 @@ def write():
         stories = ""
         i = 0
         while i < 10:
+            print("story %d start..." % (i + 1))
             stories += article(sess, end_points, vocabularies, word_int_map, input_data)
             stories += "\n\n\n\n"
             i += 1
