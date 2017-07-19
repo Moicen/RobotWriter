@@ -49,8 +49,9 @@ def train(batch_size = 10, epochs = 200):
     story_vector, word_to_int, vocabularies = process(FLAGS.file_path)
 
     batches_inputs, batches_outputs = generate_batch(batch_size, story_vector, word_to_int)
-
+    
     input_data = tf.placeholder(tf.int32, [batch_size, None])
+    
     output_targets = tf.placeholder(tf.int32, [batch_size, None])
 
     end_points = rnn_model(model='lstm', input_data=input_data, output_data=output_targets, vocab_size=len(
@@ -92,16 +93,11 @@ def train(batch_size = 10, epochs = 200):
             saver.save(sess, os.path.join(FLAGS.checkpoints_dir, FLAGS.model_prefix), global_step=epoch)
             print('[INFO] Last epoch were saved, next time will start from epoch {}.'.format(epoch))
 
-def to_word(predictions, vocabularies):
+def to_word(predictions, vocabularies, idx = None):
     predictions = predictions[0]
-    idx = np.argmax(predictions)
-    
-    if(idx >= len(vocabularies)):
-        idx = len(vocabularies) - 1
-
-    word = vocabularies[idx]
-    print("index: %d, word: %s" % (idx, word))
-    return word
+    if idx is None:
+        idx = np.argmax(predictions)
+    return vocabularies[idx]
 
 
 def write():
@@ -109,7 +105,7 @@ def write():
     story_vector, word_int_map, vocabularies = process(FLAGS.file_path)
 
 
-    input_data = tf.placeholder(tf.int32, [batch_size, None])
+    input_data = tf.placeholder(tf.int32, [batch_size])
 
     end_points = rnn_model(model='lstm', input_data=input_data, output_data=None, vocab_size=len(
         vocabularies), rnn_size=128, num_layers=2, batch_size=64, learning_rate=FLAGS.learning_rate)
@@ -126,8 +122,8 @@ def write():
 
         [predict, last_state] = sess.run([end_points['prediction'], end_points['last_state']],
                                          feed_dict={input_data: x})
-        
-        word = to_word(predict, vocabularies)
+        # 第一个词，随机一个索引
+        word = to_word(predict, vocabularies, np.random.random_integers(7, 5111))
 
         story = ''
         while word != end_token:

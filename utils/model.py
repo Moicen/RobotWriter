@@ -53,22 +53,21 @@ def rnn_model(model, input_data, output_data, vocab_size, rnn_size=128, num_laye
 
     with tf.device("/cpu:0"):
         embedding = tf.get_variable('embedding', initializer=tf.random_uniform(
-            [vocab_size, rnn_size], -1.0, 1.0))
+            [vocab_size + 1, rnn_size], -1.0, 1.0))
         inputs = tf.nn.embedding_lookup(embedding, input_data)
 
     # [batch_size, ?, rnn_size] = [64, ?, 128]
     outputs, last_state = tf.nn.dynamic_rnn(cell, inputs, initial_state=initial_state)
     output = tf.reshape(outputs, [-1, rnn_size])
 
-    weights = tf.Variable(tf.truncated_normal([rnn_size, vocab_size]))
-    bias = tf.Variable(tf.zeros(shape=[vocab_size]))
+    weights = tf.Variable(tf.truncated_normal([rnn_size, vocab_size + 1]))
+    bias = tf.Variable(tf.zeros(shape=[vocab_size + 1]))
     logits = tf.nn.bias_add(tf.matmul(output, weights), bias=bias)
-
     # [?, vocab_size+1]
 
     if output_data is not None:
         # output_data must be one-hot encode
-        labels = tf.one_hot(tf.reshape(output_data, [-1]), depth=vocab_size)
+        labels = tf.one_hot(tf.reshape(output_data, [-1]), depth=vocab_size + 1)
         # should be [?, vocab_size+1]
 
         loss = tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=logits)

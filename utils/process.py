@@ -76,7 +76,8 @@ def process(file_name):
     # print(word_int_map)
 
     # translate all articles into int vector
-    vector = [list(map(lambda word: word_int_map.get(word, len(words)), article)) for article in articles]
+    vector = [list(map(lambda word: word_int_map.get(word, len(words)), jieba.lcut(article, cut_all=False))) for article in articles]
+
     return vector, word_int_map, words
 
 
