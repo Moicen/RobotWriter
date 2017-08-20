@@ -34,7 +34,7 @@ lstm_size = 512         # Size of hidden layers in LSTMs
 layer_count  = 2          # Number of LSTM layers
 learning_rate = 0.001    # Learning rate
 keep_prob = 0.5         # Dropout keep probability
-save_freq = 50          # 每n轮进行一次变量保存
+save_freq = 10          # 每n轮进行一次变量保存
 
 
 
@@ -46,9 +46,6 @@ tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'),
 
 
 FLAGS = tf.app.flags.FLAGS
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
-
 
 def train(batch_size=10, seq_len=150, epochs=200):
     if not os.path.exists(os.path.dirname(FLAGS.checkpoints_dir)):
@@ -66,7 +63,7 @@ def train(batch_size=10, seq_len=150, epochs=200):
 
     saver = tf.train.Saver(max_to_keep=100)
     
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+    with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         print('[INFO] 开始训练...')
 
@@ -140,7 +137,7 @@ def sample(checkpoint, length, lstm_size, start=None):
     # sampling=True意味着batch的size=1 x 1
     model = CharRNN(len(vocab), lstm_size=lstm_size, sampling=True)
     saver = tf.train.Saver()
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+    with tf.Session() as sess:
         # 加载模型参数，恢复训练
         saver.restore(sess, checkpoint)
         new_state = sess.run(model.initial_state)

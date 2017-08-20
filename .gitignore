@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# floyd
+.floy*
+
+# idea
+.idea/
+
 # C extensions
 *.so
 
