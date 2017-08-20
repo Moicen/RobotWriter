@@ -33,78 +33,41 @@ def read(file_name):
     else:
         print('not set dir. please check')
 
-    with open(file_name, 'r+') as file:
-        articles = []
-        content = []
-        for line in file.readlines():
-            #ignore title
-            if(line[0] != ''):
-                pass
-            line = line.strip()
-            if line == '':
-                if(len(content) > 0):
-                    content.append('E')
-                    articles.append('\n'.join(content))
-                content.clear()
-            else:
-                if(len(content) == 0):
-                    content.append('S')
-                content.append(line)
-    return articles
+    with open(file_name, 'r+') as f:
+        content = f.read()
+    return content
 
 
 def process(file_name):
     
-    articles = read(file_name)
-    articles = sorted(articles, key=lambda article: len(article))
-    print('total %d stories...' % len(articles))
+    content = read(file_name)
     
-    all_words = []
-    for article in articles:
-        all_words += jieba.lcut(article, cut_all=False)
+    words = jieba.lcut(content, cut_all=False)
+    vocab = set(words)
+    word2int = { w: i for i, w in enumerate(vocab)}
+    int2word = dict(enumerate(vocab))
 
-    # calculate how many time appear per word
-    counter = collections.Counter(all_words)
-    # sorted depends on frequent
-    counter_pairs = sorted(counter.items(), key=lambda x: -x[1])
-    words, _ = zip(*counter_pairs)
+    data = np.array([word2int[c] for c in words], dtype=np.int32)
+
+    return data, word2int, int2word, vocab
+
+
+def generate_batch(data, seq_count, seq_len):
+
+    batch_size = seq_count * seq_len
+    batch_count = int(len(data) / batch_size)
     
-    words = words[:len(words)] + (' ',)
+    print("共计 %d 词语单元, %d 批次" % (len(data), batch_count))
 
-    word_int_map = dict(zip(words, range(len(words))))
+    data = data[: batch_size * batch_count]
 
-    # translate all articles into int vector
-    vector = [list(map(lambda word: word_int_map.get(word, len(words)), jieba.lcut(article, cut_all=False))) for article in articles]
+    data = data.reshape((seq_count, -1))
 
-    return vector, word_int_map, words
+    for n in range(0, data.shape[1], seq_len):
+        x = data[:, n:n+seq_len]
+        y = np.zeros_like(x)
+        y[:, :-1], y[:, -1] = x[:, 1:], y[:, 0]
+        yield x, y
 
 
-def generate_batch(batch_size, vector, word_to_int):
-    # split all items into n_chunks * batch_size
-    n_chunk = len(vector) // batch_size
-    print("vector: %d, chunks: %d" % (len(vector), n_chunk))
-    x_batches = []
-    y_batches = []
-    for i in range(n_chunk):
-        start_index = i * batch_size
-        end_index = start_index + batch_size
-
-        batches = vector[start_index:end_index]
-        # very batches length depends on the longest lyric
-        length = max(map(len, batches))
-        # 填充一个这么大小的空batch，空的地方放空格对应的index标号
-        x_data = np.full((batch_size, length), word_to_int[' '], np.int32)
-        for row in range(batch_size):
-            x_data[row, :len(batches[row])] = batches[row]
-        y_data = np.copy(x_data)
-        # y的话就是x向左边也就是前面移动一个
-        y_data[:, :-1] = x_data[:, 1:]
-        """
-        x_data             y_data
-        [6,2,4,6,9]       [2,4,6,9,9]
-        [1,4,2,8,5]       [4,2,8,5,5]
-        """
-        x_batches.append(x_data)
-        y_batches.append(y_data)
-    return x_batches, y_batches
 
