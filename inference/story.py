@@ -46,6 +46,8 @@ tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'),
 
 
 FLAGS = tf.app.flags.FLAGS
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.7)
 
 
 def train(batch_size=10, seq_len=150, epochs=200):
@@ -64,14 +66,15 @@ def train(batch_size=10, seq_len=150, epochs=200):
 
     saver = tf.train.Saver(max_to_keep=100)
     
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         sess.run(tf.global_variables_initializer())
         print('[INFO] 开始训练...')
-        counter = 0
+
         for e in range(epochs):
             print("[INFO]--------- 第%d轮(共%d轮) --------" % (e + 1, epochs))
             # Train network
             new_state = sess.run(model.initial_state)
+            counter = 0
 
             for x, y in generate_batch(data, batch_size, seq_len):
                 counter += 1
@@ -137,7 +140,7 @@ def sample(checkpoint, length, lstm_size, start=None):
     # sampling=True意味着batch的size=1 x 1
     model = CharRNN(len(vocab), lstm_size=lstm_size, sampling=True)
     saver = tf.train.Saver()
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         # 加载模型参数，恢复训练
         saver.restore(sess, checkpoint)
         new_state = sess.run(model.initial_state)
