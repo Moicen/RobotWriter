@@ -31,6 +31,7 @@ def parse_args():
     parser.add_argument('--b', dest='batch_size', type=int, help=help_)
     parser.add_argument('--s', dest='seq_len', type=int, help=help_)
     parser.add_argument('--e', dest='epochs', type=int, help=help_)
+    parser.add_argument('--l', dest='limit', type=int, help=help_)
     parser.set_defaults(train=True)
 
     args_ = parser.parse_args()
@@ -41,9 +42,9 @@ if __name__ == '__main__':
     args = parse_args()
     from inference import story
     if args.train:
-        story.main(True, args.batch_size, args.seq_len, args.epochs)
+        story.main(True, args.batch_size, args.seq_len, args.epochs, None)
     else:
-        story.main(False, None, None, None)
+        story.main(False, None, None, None, args.limit)
 
 
 

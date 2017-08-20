@@ -159,19 +159,19 @@ def sample(checkpoint, length, lstm_size, start=None):
     return ''.join(content)
 
 
-def write():
+def write(limit=1000):
     # 选用最终的训练参数作为输入进行文本生成
     checkpoint = tf.train.latest_checkpoint('checkpoints')
-    story = sample(checkpoint, 3000, lstm_size, start=None)
+    story = sample(checkpoint, limit, lstm_size, start=None)
     return story
 
-def main(is_train, batch_size, seq_len, epochs):
+def main(is_train, batch_size, seq_len, epochs, limit):
     if is_train:
         print('[INFO] 训练故事...')
         train(batch_size, seq_len, epochs)
     else:
         print('[INFO] 生成故事...')
-        story = write()
+        story = write(limit)
         if not os.path.isdir(FLAGS.output_dir):
             os.makedirs(FLAGS.output_dir)
         with open(FLAGS.output_path, 'w') as f:

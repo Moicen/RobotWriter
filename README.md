@@ -8,10 +8,11 @@ usage:
 
 	# train
 	python3 main.py --t [--b=] [--s=] [--e=]
-	b=bath size 设置每批次包含多少个序列
-	s=sequnce length 设置每个序列包含多少个词单元（单字或词）
-	e=eporch count 设置总计训练多少轮
+	b=bath size 设置每批次包含多少个序列 默认 3
+	s=sequnce length 设置每个序列包含多少个词单元（单字或词）默认 150
+	e=eporch count 设置总计训练多少轮 默认 200
 	#generate
-	python3 main.py --w
+	python3 main.py --w [--l=]
+	l=limit 设置最多输出多少个字结束 默认 1000
 
 
