@@ -113,7 +113,7 @@ def pick_top_n(preds, vocab_size, top_n=5):
     return c
 
 
-def sample(checkpoint, length, lstm_size, start=None):
+def sample(checkpoint, length, lstm_size, start=""):
     """
     生成新文本
     
@@ -162,7 +162,7 @@ def sample(checkpoint, length, lstm_size, start=None):
 def write(limit=1000):
     # 选用最终的训练参数作为输入进行文本生成
     checkpoint = tf.train.latest_checkpoint('checkpoints')
-    story = sample(checkpoint, limit, lstm_size, start=None)
+    story = sample(checkpoint, limit, lstm_size, start="")
     return story
 
 def main(is_train, batch_size, seq_len, epochs, limit):
@@ -172,6 +172,7 @@ def main(is_train, batch_size, seq_len, epochs, limit):
     else:
         print('[INFO] 生成故事...')
         story = write(limit)
+        print("output story: \n", story)
         if not os.path.isdir(FLAGS.output_dir):
             os.makedirs(FLAGS.output_dir)
         with open(FLAGS.output_path, 'w') as f:
