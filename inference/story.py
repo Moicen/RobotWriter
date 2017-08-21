@@ -34,7 +34,7 @@ lstm_size = 512         # Size of hidden layers in LSTMs
 layer_count  = 2          # Number of LSTM layers
 learning_rate = 0.001    # Learning rate
 keep_prob = 0.5         # Dropout keep probability
-save_freq = 10          # 每n轮进行一次变量保存
+save_freq = 50          # 每n轮进行一次变量保存
 
 
 
@@ -128,21 +128,21 @@ def sample(checkpoint, length, lstm_size, start=""):
     pattern = re.compile("[\u4e00-\u9fa5]")
     match = re.search(pattern, start)
     while(match is None):
-        start = int2word(np.random.random_integers(7, len(vocab) - 1))
+        start = int2word[np.random.random_integers(7, len(vocab) - 1)]
         match = re.search(pattern, start)
     
     print("随机起始文字：%s" % start)
     content = [start]
 
     # sampling=True意味着batch的size=1 x 1
-    model = CharRNN(len(vocab), lstm_size=lstm_size, sampling=True)
+    model = WordRNN(len(vocab), lstm_size=lstm_size, sampling=True)
     saver = tf.train.Saver()
     with tf.Session() as sess:
         # 加载模型参数，恢复训练
         saver.restore(sess, checkpoint)
         new_state = sess.run(model.initial_state)
         x = np.zeros((1, 1))
-        w = vocab_to_int[start]
+        w = word2int[start]
         
         # 不断生成字符，直到达到指定数目
         for i in range(length):
