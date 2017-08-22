@@ -25,6 +25,7 @@ import tensorflow as tf
 from utils.model import WordRNN
 from utils.process import process, generate_batch
 import time
+import datetime
 import re
 
 
@@ -34,7 +35,7 @@ lstm_size = 512         # Size of hidden layers in LSTMs
 layer_count  = 2          # Number of LSTM layers
 learning_rate = 0.001    # Learning rate
 keep_prob = 0.5         # Dropout keep probability
-save_freq = 50          # 每n轮进行一次变量保存
+save_freq = 10          # 每n轮进行一次变量保存
 
 
 
@@ -47,8 +48,8 @@ tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'),
 
 FLAGS = tf.app.flags.FLAGS
 
-def datetime():
-    return time.strftime("%Y-%m-%d %H:%M:%S");
+def strdatetime():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
 def train(batch_size=10, seq_len=150, epochs=200):
     if not os.path.exists(os.path.dirname(FLAGS.checkpoints_dir)):
@@ -68,17 +69,25 @@ def train(batch_size=10, seq_len=150, epochs=200):
     
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        print('[%s] 开始训练...' % time.time())
-        counter = 0
-        for e in range(epochs):
-            print("[%s]--------- 第%d轮(共%d轮) --------" % (datetime(), e + 1, epochs))
+        
+        start_epoch = 0
+        checkpoint = tf.train.latest_checkpoint(FLAGS.checkpoints_dir)
+        if checkpoint:
+            saver.restore(sess, checkpoint)
+            print("[%s] 从checkpoints中恢复继续训练 {0}".format(checkpoint))
+            start_epoch += int(checkpoint.split('-')[0])
+
+        print('[%s] 开始训练...' % strdatetime())
+        for e in range(start_epoch, epochs):
+            print("[%s]--------- 第%d轮(共%d轮) --------" % (strdatetime(), e + 1, epochs))
             # Train network
             new_state = sess.run(model.initial_state)
 
             batch = 0
+            batch_count = int(len(data) / (batch_size * seq_len))
+            print("共计 %d 词语单元, %d 批次" % (len(data), batch_count))
             for x, y in generate_batch(data, batch_size, seq_len):
                 batch += 1
-                counter += 1
                 start = time.time()
                 feed = {model.inputs: x,
                         model.targets: y,
@@ -91,12 +100,10 @@ def train(batch_size=10, seq_len=150, epochs=200):
                 end = time.time()
                 # control the print lines
                 # if counter % 100 == 0:
-                print('[%s] 批次: %d , 时间: %.6fs, 误差: %.6f' % (datetime(), batch, end - start, loss))
+                print('[%s] 批次: %d , 时间: %.6fs, 误差: %.6f' % (strdatetime(), batch, end - start, loss))
                 
-                if (counter % save_freq == 0):
-                    saver.save(sess, "checkpoints/i{}_l{}.ckpt".format(counter, lstm_size))
-        
-        saver.save(sess, "checkpoints/i{}_l{}.ckpt".format(counter, lstm_size))
+                if ((e + 1) % save_freq == 0 and (batch == batch_count or batch == 1 or batch == int(batch_count / 2))):
+                    saver.save(sess, "checkpoints/{}-{}-{}.ckpt".format(e + 1, batch, lstm_size))
 
 
 def pick_top_n(preds, vocab_size, top_n=5):

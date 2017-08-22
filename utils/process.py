@@ -57,8 +57,6 @@ def generate_batch(data, seq_count, seq_len):
 
     batch_size = seq_count * seq_len
     batch_count = int(len(data) / batch_size)
-    
-    print("共计 %d 词语单元, %d 批次" % (len(data), batch_count))
 
     data = data[: batch_size * batch_count]
 
