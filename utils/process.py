@@ -43,6 +43,7 @@ def process(file_name):
     content = read(file_name)
     
     words = jieba.lcut(content, cut_all=False)
+    words = words + ['\n']
     vocab = set(words)
     word2int = { w: i for i, w in enumerate(vocab)}
     int2word = dict(enumerate(vocab))

@@ -38,7 +38,7 @@ save_freq = 50          # 每n轮进行一次变量保存
 
 
 
-tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/afanti.txt'), 'file path of story.')
+tf.app.flags.DEFINE_string('file_path', os.path.abspath('./dataset/afanti-1.txt'), 'file path of story.')
 tf.app.flags.DEFINE_string('checkpoints_dir', os.path.abspath('./checkpoints'), 'checkpoints save path.')
 tf.app.flags.DEFINE_string('model_prefix', 'story', 'model save prefix.')
 tf.app.flags.DEFINE_string('output_dir', os.path.abspath('./output'), 'dir of output.')
@@ -46,6 +46,9 @@ tf.app.flags.DEFINE_string('output_path', os.path.abspath('./output/story.txt'),
 
 
 FLAGS = tf.app.flags.FLAGS
+
+def datetime():
+    return time.strftime("%Y-%m-%d %H:%M:%S");
 
 def train(batch_size=10, seq_len=150, epochs=200):
     if not os.path.exists(os.path.dirname(FLAGS.checkpoints_dir)):
@@ -65,15 +68,16 @@ def train(batch_size=10, seq_len=150, epochs=200):
     
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        print('[INFO] 开始训练...')
-
+        print('[%s] 开始训练...' % time.time())
+        counter = 0
         for e in range(epochs):
-            print("[INFO]--------- 第%d轮(共%d轮) --------" % (e + 1, epochs))
+            print("[%s]--------- 第%d轮(共%d轮) --------" % (datetime(), e + 1, epochs))
             # Train network
             new_state = sess.run(model.initial_state)
-            counter = 0
 
+            batch = 0
             for x, y in generate_batch(data, batch_size, seq_len):
+                batch += 1
                 counter += 1
                 start = time.time()
                 feed = {model.inputs: x,
@@ -87,7 +91,7 @@ def train(batch_size=10, seq_len=150, epochs=200):
                 end = time.time()
                 # control the print lines
                 # if counter % 100 == 0:
-                print('[INFO] 批次: %d , 时间: %.6fs, 误差: %.6f' % (counter, end - start, loss))
+                print('[%s] 批次: %d , 时间: %.6fs, 误差: %.6f' % (datetime(), batch, end - start, loss))
                 
                 if (counter % save_freq == 0):
                     saver.save(sess, "checkpoints/i{}_l{}.ckpt".format(counter, lstm_size))
@@ -124,6 +128,13 @@ def sample(checkpoint, length, lstm_size, start=""):
     """
 
     data, word2int, int2word, vocab = process(FLAGS.file_path)
+
+    with open("./output/w2i.txt", "w") as f:
+        f.write(str(word2int))
+    with open("./output/i2w.txt", "w") as f:
+        f.write(str(int2word))
+    with open("./output/vocab.txt", "w") as f:
+        f.write(str(vocab))
     
     pattern = re.compile("[\u4e00-\u9fa5]")
     match = re.search(pattern, start)
@@ -153,6 +164,8 @@ def sample(checkpoint, length, lstm_size, start=""):
             preds, new_state = sess.run([model.prediction, model.final_state], 
                                          feed_dict=feed)
 
+            # idx = np.argmax(preds[0])
+
             w = pick_top_n(preds, len(vocab))
             content.append(int2word[w])
         
@@ -161,7 +174,7 @@ def sample(checkpoint, length, lstm_size, start=""):
 
 def write(limit=1000):
     # 选用最终的训练参数作为输入进行文本生成
-    checkpoint = tf.train.latest_checkpoint('checkpoints')
+    checkpoint = tf.train.latest_checkpoint('./checkpoints')
     story = sample(checkpoint, limit, lstm_size, start="")
     return story
 
@@ -172,7 +185,6 @@ def main(is_train, batch_size, seq_len, epochs, limit):
     else:
         print('[INFO] 生成故事...')
         story = write(limit)
-        print("output story: \n", story)
         if not os.path.isdir(FLAGS.output_dir):
             os.makedirs(FLAGS.output_dir)
         with open(FLAGS.output_path, 'w') as f:
