@@ -71,11 +71,13 @@ def train(batch_size=10, seq_len=150, epochs=200):
         sess.run(tf.global_variables_initializer())
         
         start_epoch = 0
-        checkpoint = tf.train.latest_checkpoint(FLAGS.checkpoints_dir)
+        checkpoint = tf.train.latest_checkpoint('./checkpoints')
         if checkpoint:
             saver.restore(sess, checkpoint)
-            print("[%s] 从checkpoints中恢复继续训练 {0}".format(checkpoint))
-            start_epoch += int(checkpoint.split('-')[0])
+            print(checkpoint)
+            print("[%s] 从checkpoints中恢复继续训练 {0}".format(checkpoint) % strdatetime())
+            pattern = re.compile("\./checkpoints/(\d+).*")
+            start_epoch += int(re.match(pattern, checkpoint).group(1))
 
         print('[%s] 开始训练...' % strdatetime())
         for e in range(start_epoch, epochs):
